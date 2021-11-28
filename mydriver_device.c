@@ -21,6 +21,7 @@
 
 #include <linux/pci.h>
 #include <linux/device.h>
+#include <linux/kobject.h>
 
 
 /* 
@@ -263,7 +264,12 @@ etx_driver_init(void) {
 
 
     while (dev2 = pci_get_device(PCI_ANY_ID, PCI_ANY_ID, dev2)){
-        printk(KERN_INFO "pci found [%s]\n", dev2->dev.type->name);
+        printk(KERN_INFO "pci found device:%]\n", dev2->device);
+        printk(KERN_INFO "init name:%s\n", dev2->dev.init_name);
+        printk(KERN_INFO "(parent) init name:%s\n", dev2->dev.parent->init_name);
+        printk(KERN_INFO "(kobject) name:%s\n", dev2->dev.kobj.name);
+        printk(KERN_INFO "      parent name:%s\n", dev2->dev.kobj.parent->name);
+        printk(KERN_INFO "(type) name:%s\n", dev2->dev.type->name);
     }
 
     /*Allocating Major number*/
