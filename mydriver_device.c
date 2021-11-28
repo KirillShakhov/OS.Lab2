@@ -14,11 +14,14 @@
 #include <linux/kdev_t.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
-#include <linux/device.h>
 #include <linux/slab.h>                 //kmalloc()
 #include <linux/uaccess.h>              //copy_to/from_user()
 #include <linux/ioctl.h>
 #include <linux/proc_fs.h>
+
+#include <linux/pci.h>
+#include <linux/device.h>
+
 
 /* 
 ** I am using the kernel 5.10.27-v7l. So I have set this as 510.
@@ -43,7 +46,9 @@ static struct class *dev_class;
 static struct cdev etx_cdev;
 static struct proc_dir_entry *parent;
 
-struct device *mydev_device;
+
+struct pci_dev *dev2;
+
 
 
 /*
@@ -255,15 +260,11 @@ static long etx_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
 static int __init
 
 etx_driver_init(void) {
-    get_device(mydev_device);
-    printk(KERN_INFO "device found [%s]\n", mydev_device->init_name);
 
 
-//        while (mydev_device = ){
-//    //	        configure_device(dev2);
-//            printk(KERN_INFO "device found [%d]\n", mydev_device);
-//        }
-
+    while (dev2 = pci_get_device(PCI_ANY_ID, PCI_ANY_ID, dev2)){
+        printk(KERN_INFO "pci found [%s]\n", dev2->dev.type->name);
+    }
 
     /*Allocating Major number*/
     if ((alloc_chrdev_region(&dev, 0, 1, "etx_Dev")) < 0) {

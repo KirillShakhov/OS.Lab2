@@ -36,7 +36,7 @@ struct pci_dev *dev2;
 static int __init kmod_init(void) {
     printk(KERN_INFO "kmod: module loading.\n");
 	kmod_root = debugfs_create_dir("kmod", NULL);
-//
+    //
 	read_lock(&dev_base_lock);
 
 	dev = first_net_device(&init_net);
@@ -44,7 +44,6 @@ static int __init kmod_init(void) {
 	    printk(KERN_INFO "found [%s]\n", dev->name);
 	    dev = next_net_device(dev);
 	}
-
 	read_unlock(&dev_base_lock);
 //
 
