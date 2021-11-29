@@ -38,7 +38,6 @@
 
 int32_t value = 0;
 
-char etx_array[20] = "try_proc_array\n";
 static int len = 1;
 
 
@@ -49,6 +48,9 @@ static struct proc_dir_entry *parent;
 static struct proc_dir_entry *parent_device;
 static struct proc_dir_entry *parent_dm_dirty_log_type;
 
+char etx_array[200] = "try_proc_arraytry_proc_arraytry_proc_arraytry_proc_arraytry_proc_arraytry_proc_arraytry_proc_arraytry_proc_array\n";
+
+
 
 struct pci_dev *dev2;
 
@@ -57,40 +59,20 @@ struct pci_dev *dev2;
 /*
 ** Function Prototypes
 */
-static int __init
-
-etx_driver_init(void);
-
-static void __exit
-
-etx_driver_exit(void);
+static int __init etx_driver_init(void);
+static void __exit etx_driver_exit(void);
 
 /*************** Driver Functions **********************/
 static int etx_open(struct inode *inode, struct file *file);
-
 static int etx_release(struct inode *inode, struct file *file);
-
-static ssize_t etx_read(struct file *filp, char __user
-
-*buf,
-size_t len, loff_t
-* off);
-
+static ssize_t etx_read(struct file *filp, char __user *buf, size_t len, loff_t * off);
 static ssize_t etx_write(struct file *filp, const char *buf, size_t len, loff_t *off);
-
 static long etx_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
 
 /***************** Procfs Functions *******************/
 static int open_proc(struct inode *inode, struct file *file);
-
 static int release_proc(struct inode *inode, struct file *file);
-
-static ssize_t read_proc(struct file *filp, char __user
-
-*buffer,
-size_t length, loff_t
-* offset);
-
+static ssize_t read_proc(struct file *filp, char __user *buffer, size_t length, loff_t * offset);
 static ssize_t write_proc(struct file *filp, const char *buff, size_t len, loff_t *off);
 
 /*
@@ -161,7 +143,8 @@ static ssize_t read_proc(struct file *filp, char __user *buffer,size_t length, l
         len = 1;
         return 0;
     }
-    if(copy_to_user(buffer, etx_array,20)){
+    etx_array = filp->f_path->mnt_root
+    if(copy_to_user(buffer, etx_array, sizeof(etx_array))){
         pr_err("Data Send : Err!\n");
     }
     return length;
@@ -238,12 +221,7 @@ static long etx_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
 /*
 ** Module Init function
 */
-static int __init
-
-etx_driver_init(void) {
-
-
-
+static int __init etx_driver_init(void) {
 
     /*Allocating Major number*/
     if ((alloc_chrdev_region(&dev, 0, 1, "etx_Dev")) < 0) {
@@ -295,10 +273,19 @@ etx_driver_init(void) {
 //    proc_create("etxmyproccess", 0666, parent, &proc_fops);
 
 
-    while (dev2 = pci_get_device(PCI_ANY_ID, PCI_ANY_ID, dev2)){
+    for_each_pci_dev(dev2){
+//        struct fb_data_t foo_data;
+//        strcpy(foo_data.name, "device name");
+
         char s[20]; // Для двузначного хватит и s[3] - не забываем о нулевом символе
         sprintf(s,"%d",dev2->device);
+
+//        strcpy(foo_data.value, s);
+
         proc_create(s, 0666, parent_device, &proc_fops);
+
+
+
         printk(KERN_INFO "pci found device:%d\n", dev2->device);
         printk(KERN_INFO "init name:%s\n", dev2->dev.init_name);
         printk(KERN_INFO "(parent) init name:%s\n", dev2->dev.parent->init_name);
