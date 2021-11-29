@@ -46,6 +46,8 @@ dev_t dev = 0;
 static struct class *dev_class;
 static struct cdev etx_cdev;
 static struct proc_dir_entry *parent;
+static struct proc_dir_entry *parent_device;
+static struct proc_dir_entry *parent_dm_dirty_log_type;
 
 
 struct pci_dev *dev2;
@@ -150,30 +152,19 @@ static int release_proc(struct inode *inode, struct file *file) {
 /*
 ** This function will be called when we read the procfs file
 */
-static ssize_t read_proc(struct file *filp, char __user
-
-*buffer,
-size_t length, loff_t
-* offset)
-{
-pr_info("proc file read.....\n");
-if(len)
-{
-len = 0;
-}
-else
-{
-len = 1;
-return 0;
-}
-if(
-copy_to_user(buffer, etx_array,
-20))
-{
-pr_err("Data Send : Err!\n");
-}
-return
-length;
+static ssize_t read_proc(struct file *filp, char __user *buffer,size_t length, loff_t * offset){
+    pr_info("proc file read.....\n");
+    if(len){
+        len = 0;
+    }
+    else{
+        len = 1;
+        return 0;
+    }
+    if(copy_to_user(buffer, etx_array,20)){
+        pr_err("Data Send : Err!\n");
+    }
+    return length;
 }
 
 /*
@@ -182,9 +173,9 @@ length;
 static ssize_t write_proc(struct file *filp, const char *buff, size_t len, loff_t *off) {
     pr_info("proc file wrote.....\n");
 
-    if (copy_from_user(etx_array, buff, len)) {
-        pr_err("Data Write : Err!\n");
-    }
+//    if (copy_from_user(etx_array, buff, len)) {
+//        pr_err("Data Write : Err!\n");
+//    }
 
     return len;
 }
@@ -208,28 +199,17 @@ static int etx_release(struct inode *inode, struct file *file) {
 /*
 ** This function will be called when we read the Device file
 */
-static ssize_t etx_read(struct file *filp, char __user
-
-*buf,
-size_t len, loff_t
-*off)
-{
-pr_info("Read function\n");
-return 0;
+static ssize_t etx_read(struct file *filp, char __user *buf, size_t len, loff_t *off) {
+    pr_info("Read function\n");
+    return 0;
 }
 
 /*
 ** This function will be called when we write the Device file
 */
-static ssize_t etx_write(struct file *filp, const char __user
-
-*buf,
-size_t len, loff_t
-*off)
-{
-pr_info("Write Function\n");
-return
-len;
+static ssize_t etx_write(struct file *filp, const char __user *buf, size_t len, loff_t *off) {
+    pr_info("Write Function\n");
+    return len;
 }
 
 /*
@@ -263,14 +243,7 @@ static int __init
 etx_driver_init(void) {
 
 
-    while (dev2 = pci_get_device(PCI_ANY_ID, PCI_ANY_ID, dev2)){
-        printk(KERN_INFO "pci found device:%]\n", dev2->device);
-        printk(KERN_INFO "init name:%s\n", dev2->dev.init_name);
-        printk(KERN_INFO "(parent) init name:%s\n", dev2->dev.parent->init_name);
-        printk(KERN_INFO "(kobject) name:%s\n", dev2->dev.kobj.name);
-        printk(KERN_INFO "      parent name:%s\n", dev2->dev.kobj.parent->name);
-        printk(KERN_INFO "(type) name:%s\n", dev2->dev.type->name);
-    }
+
 
     /*Allocating Major number*/
     if ((alloc_chrdev_region(&dev, 0, 1, "etx_Dev")) < 0) {
@@ -301,15 +274,40 @@ etx_driver_init(void) {
     }
 
     /*Create proc directory. It will create a directory under "/proc" */
-    parent = proc_mkdir("etx_myfile", NULL);
+    parent = proc_mkdir("lab2", NULL);
+    parent_device = proc_mkdir("devices", parent);
+    parent_dm_dirty_log_type = proc_mkdir("dm_dirty_log_types", parent);
 
     if (parent == NULL) {
         pr_info("Error creating proc entry");
         goto r_device;
     }
+    if (parent_device == NULL) {
+        pr_info("Error creating proc entry");
+        goto r_device;
+    }
+    if (parent_dm_dirty_log_type == NULL) {
+        pr_info("Error creating proc entry");
+        goto r_device;
+    }
 
     /*Creating Proc entry under "/proc/etx/" */
-    proc_create("etxmyproccess", 0666, parent, &proc_fops);
+//    proc_create("etxmyproccess", 0666, parent, &proc_fops);
+
+
+    while (dev2 = pci_get_device(PCI_ANY_ID, PCI_ANY_ID, dev2)){
+        char s[20]; // Для двузначного хватит и s[3] - не забываем о нулевом символе
+        sprintf(s,"%d",dev2->device);
+        proc_create(s, 0666, parent_device, &proc_fops);
+        printk(KERN_INFO "pci found device:%d\n", dev2->device);
+        printk(KERN_INFO "init name:%s\n", dev2->dev.init_name);
+        printk(KERN_INFO "(parent) init name:%s\n", dev2->dev.parent->init_name);
+        printk(KERN_INFO "(kobject) name:%s\n", dev2->dev.kobj.name);
+        printk(KERN_INFO "      parent name:%s\n", dev2->dev.kobj.parent->name);
+        printk(KERN_INFO "(type) name:%s\n", dev2->dev.type->name);
+    }
+
+
 
     pr_info("Device Driver Insert...Done!!!\n");
     return 0;
