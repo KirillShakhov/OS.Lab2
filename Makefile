@@ -1,4 +1,4 @@
-obj-m += proc_rw.o
+obj-m += mydriver_device.o
 
 KDIR = /lib/modules/$(shell uname -r)/build
  

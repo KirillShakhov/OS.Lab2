@@ -20,6 +20,8 @@
 #include <linux/proc_fs.h>
 
 #include <linux/pci.h>
+
+
 #include <linux/device.h>
 #include <linux/kobject.h>
 
@@ -48,7 +50,7 @@ static struct proc_dir_entry *parent;
 static struct proc_dir_entry *parent_device;
 static struct proc_dir_entry *parent_dm_dirty_log_type;
 
-char etx_array[200] = "try_proc_arraytry_proc_arraytry_proc_arraytry_proc_arraytry_proc_arraytry_proc_arraytry_proc_arraytry_proc_array\n";
+char *etx_array;
 
 
 
@@ -74,6 +76,10 @@ static int open_proc(struct inode *inode, struct file *file);
 static int release_proc(struct inode *inode, struct file *file);
 static ssize_t read_proc(struct file *filp, char __user *buffer, size_t length, loff_t * offset);
 static ssize_t write_proc(struct file *filp, const char *buff, size_t len, loff_t *off);
+
+
+struct proc_dir_entry *proc_file_entry;
+
 
 /*
 ** File operation sturcture
@@ -143,7 +149,6 @@ static ssize_t read_proc(struct file *filp, char __user *buffer,size_t length, l
         len = 1;
         return 0;
     }
-    etx_array = filp->f_path->mnt_root
     if(copy_to_user(buffer, etx_array, sizeof(etx_array))){
         pr_err("Data Send : Err!\n");
     }
@@ -282,7 +287,7 @@ static int __init etx_driver_init(void) {
 
 //        strcpy(foo_data.value, s);
 
-        proc_create(s, 0666, parent_device, &proc_fops);
+        proc_file_entry = proc_create(s, 0666, parent_device, &proc_fops);
 
 
 
