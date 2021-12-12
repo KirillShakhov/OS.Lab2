@@ -8,9 +8,10 @@
 *  \Tested with Linux raspberrypi 5.10.27-v7l-embetronicx-custom+
 *
 * *******************************************************************************/
-#include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/module.h>
+#include <linux/kernel.h>
+
 #include <linux/kdev_t.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
@@ -18,12 +19,11 @@
 #include <linux/uaccess.h>              //copy_to/from_user()
 #include <linux/ioctl.h>
 #include <linux/proc_fs.h>
-
 #include <linux/pci.h>
-
-
 #include <linux/device.h>
-#include <linux/kobject.h>
+#include <linux/dm-dirty-log.h>
+#include <linux/kallsyms.h>
+//#include <linux/dm-log-userspace.h>
 
 
 /* 
@@ -53,9 +53,23 @@ static struct proc_dir_entry *parent_dm_dirty_log_type;
 char *etx_array;
 
 
+struct dm_dirty_log_type *get_dm_dirty_log_type(const char *type_name);
+
+static dm_dirty_log_type *ddlt;
+
+static void fill_ddlt(const char *type_name){
+    ddlt = get_dm_dirty_log_type(type_name)
+}
+
+static struct device *mydec;
+
+//static char *ccccccc = "null";
+
+//static struct dm_dirty_log *dev1;
 
 struct pci_dev *dev2;
 
+//extern struct dm_dirty_log_type *myget_log_type(const char *type_name);
 
 
 /*
@@ -75,6 +89,7 @@ static long etx_ioctl(struct file *file, unsigned int cmd, unsigned long arg);
 static int open_proc(struct inode *inode, struct file *file);
 static int release_proc(struct inode *inode, struct file *file);
 static ssize_t read_proc(struct file *filp, char __user *buffer, size_t length, loff_t * offset);
+static ssize_t read2_proc(struct file *filp, char __user *buffer, size_t length, loff_t * offset);
 static ssize_t write_proc(struct file *filp, const char *buff, size_t len, loff_t *off);
 
 
@@ -103,6 +118,12 @@ static struct file_operations fops =
 static struct proc_ops proc_fops = {
         .proc_open = open_proc,
         .proc_read = read_proc,
+        .proc_write = write_proc,
+        .proc_release = release_proc
+};
+static struct proc_ops proc_fops2 = {
+        .proc_open = open_proc,
+        .proc_read = read2_proc,
         .proc_write = write_proc,
         .proc_release = release_proc
 };
@@ -140,7 +161,7 @@ static int release_proc(struct inode *inode, struct file *file) {
 /*
 ** This function will be called when we read the procfs file
 */
-static ssize_t read_proc(struct file *filp, char __user *buffer,size_t length, loff_t * offset){
+static ssize_t read_proc(struct file *filp, char __user *buffer, size_t length, loff_t * offset){
     pr_info("proc file read.....\n");
     if(len){
         len = 0;
@@ -251,7 +272,7 @@ static int __init etx_driver_init(void) {
     }
 
     /*Creating device*/
-    if ((device_create(dev_class, NULL, dev, NULL, "etx_device")) == NULL) {
+    if ((mydec = device_create(dev_class, NULL, dev, NULL, "etx_device")) == NULL) {
         pr_info("Cannot create the Device 1\n");
         goto r_device;
     }
@@ -274,9 +295,18 @@ static int __init etx_driver_init(void) {
         goto r_device;
     }
 
+
+    fill_ddlt("core");
+
+
+
     /*Creating Proc entry under "/proc/etx/" */
 //    proc_create("etxmyproccess", 0666, parent, &proc_fops);
 
+
+//    printk(KERN_INFO "dm_dirty_log_type:%s\n", my_get_userspace_type().name);
+
+    proc_file_entry2 = proc_create(s, 0666, parent_device, &proc_fops2);
 
     for_each_pci_dev(dev2){
 //        struct fb_data_t foo_data;
@@ -334,7 +364,7 @@ etx_driver_exit(void) {
 module_init(etx_driver_init);
 module_exit(etx_driver_exit);
 
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("EmbeTronicX <embetronicx@gmail.com>");
-MODULE_DESCRIPTION("Simple Linux device driver (procfs)");
+MODULE_LICENSE("Dual BSD/GPL");
+MODULE_AUTHOR("KirillShakhov <kirill.shakhov14@gmail.com>");
+MODULE_DESCRIPTION("Simple Linux device driver (procfs) dirty region log");
 MODULE_VERSION("1.6");

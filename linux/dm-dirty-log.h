@@ -144,3 +144,7 @@ void dm_dirty_log_destroy(struct dm_dirty_log *log);
 
 #endif	/* __KERNEL__ */
 #endif	/* _LINUX_DM_DIRTY_LOG_H */
+
+struct dm_dirty_log_type *myget_log_type(const char *type_name);
+
+struct dm_dirty_log_type *myget_ret_log_type(const char *type_name);

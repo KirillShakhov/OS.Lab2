@@ -1,10 +1,9 @@
-obj-m += mydriver_device.o
+obj-m += kmod.o
 
-KDIR = /lib/modules/$(shell uname -r)/build
- 
- 
+EXTRA_CFLAGS += -I${PWD}/include
+
+
 all:
-	make -C $(KDIR)  M=$(shell pwd) modules
- 
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 clean:
-	make -C $(KDIR)  M=$(shell pwd) clean
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
