@@ -37,8 +37,9 @@ static struct proc_dir_entry *parent;
 struct dm_dirty_log_type *dmDirtyLogType;
 struct pci_dev *dev2;
 
-char etx_array[100]="null";
-char str2[100]="null";
+char etx_array[10]="null";
+char str2[10]="null";
+char str3[10]="null";
 
 
 struct dm_dirty_log_type *myget_ret_log_type(const char *type_name);
@@ -255,7 +256,9 @@ static ssize_t show_dm_dirty_log_type(struct file *filp, char __user *buffer, si
 static ssize_t write_proc(struct file *filp, const char *buff, size_t len, loff_t * off)
 {
     pr_info("proc file wrote.....\n");
-
+    for (i = 0; i < 10; i++){
+        etx_array[i] = '\0';
+    }
     if( copy_from_user(etx_array,buff,len) )
     {
         pr_err("Data Write : Err!\n");
@@ -348,11 +351,72 @@ static ssize_t show_device(struct file *filp, char __user *buffer, size_t length
             }
     }
     else{
-//        for_each_pci_dev(dev2){
-//        }
         clean_line();
-        sprintf(str, "name:%s\n", etx_array);
+        sprintf(str, "%s", etx_array);
         go_to_new_line();
+
+
+
+
+
+        clean_line();
+        sprintf(str, "%s\n", etx_array);
+        go_to_new_line();
+
+        for_each_pci_dev(dev2){
+//            strcpy(dst, src);
+
+
+            for (i = 0; i < 10; i++){
+                str3[i] = '\0';
+            }
+            sprintf(str3, "%d\n", (dev2->device));
+
+            clean_line();
+            sprintf(str, "%s\n", str3);
+            go_to_new_line();
+
+            if (strcmp (etx_array, str3)==0){
+
+                clean_line();
+                sprintf(str, "pci found [%d]\n", (dev2->device));
+                go_to_new_line();
+                clean_line();
+                sprintf(str, "init name:%s\n", (dev2->dev.init_name));
+                go_to_new_line();
+                clean_line();
+                sprintf(str, "(parent) init name:%s\n", (dev2->dev.parent->init_name));
+                go_to_new_line();
+                clean_line();
+                sprintf(str, "(kobject) name:%s\n", (dev2->dev.kobj.name));
+                go_to_new_line();
+                clean_line();
+                sprintf(str, "    parent name:%s\n", (dev2->dev.kobj.parent->name));
+                go_to_new_line();
+                clean_line();
+                sprintf(str, "(type) name:%s\n", (dev2->dev.type->name));
+                go_to_new_line();
+                clean_line();
+                sprintf(str, "(bus) name:%s\n", (dev2->dev.bus->name));
+                go_to_new_line();
+                clean_line();
+                sprintf(str, "(bus) dev_name:%s\n", (dev2->dev.bus->dev_name));
+                go_to_new_line();
+                clean_line();
+                sprintf(str, "(mutex) owner:%ld\n", atomic_long_read(&dev2->dev.mutex.owner));
+                go_to_new_line();
+                clean_line();
+                sprintf(str, "(power) active_time:%llu\n", dev2->dev.power.active_time);
+                go_to_new_line();
+                clean_line();
+                sprintf(str, "(power) runtime_status:%s\n", rpm_status_to_str(dev2->dev.power.runtime_status));
+                go_to_new_line();
+                clean_line();
+                sprintf(str, "(power) usage_count:%d\n", atomic_read(&dev2->dev.power.usage_count));
+                go_to_new_line();
+                return length;
+            }
+        }
     }
 
     if(copy_to_user(buffer, arr, k)){
