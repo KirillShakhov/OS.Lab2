@@ -11,20 +11,9 @@
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/module.h>
-#include <linux/kdev_t.h>
-#include <linux/cdev.h>
-#include <linux/device.h>
 #include <linux/slab.h>                 //kmalloc()
 #include <linux/uaccess.h>              //copy_to/from_user()
-#include <linux/ioctl.h>
-#include <linux/slab.h>
 #include <linux/proc_fs.h>
-
-//мое
-//#include <linux/pid.h>
-//#include <linux/netdevice.h>
-//#include <linux/signal.h>
-//#include <linux/sched.h>
 //
 #include <linux/dm-dirty-log.h>
 #include <linux/list.h>
