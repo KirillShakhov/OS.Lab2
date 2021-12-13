@@ -359,9 +359,9 @@ static ssize_t show_device(struct file *filp, char __user *buffer, size_t length
 
 
 
-        clean_line();
-        sprintf(str, "%s\n", etx_array);
-        go_to_new_line();
+//        clean_line();
+//        sprintf(str, "%s\n", etx_array);
+//        go_to_new_line();
 
         for_each_pci_dev(dev2){
 //            strcpy(dst, src);
@@ -372,9 +372,9 @@ static ssize_t show_device(struct file *filp, char __user *buffer, size_t length
             }
             sprintf(str3, "%d\n", (dev2->device));
 
-            clean_line();
-            sprintf(str, "%s\n", str3);
-            go_to_new_line();
+//            clean_line();
+//            sprintf(str, "%s\n", str3);
+//            go_to_new_line();
 
             if (strcmp (etx_array, str3)==0){
 
