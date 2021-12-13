@@ -12,7 +12,6 @@
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/kdev_t.h>
-#include <linux/fs.h>
 #include <linux/cdev.h>
 #include <linux/device.h>
 #include <linux/slab.h>                 //kmalloc()
@@ -21,17 +20,12 @@
 #include <linux/slab.h>
 #include <linux/proc_fs.h>
 
-#include <linux/pci.h>
 //мое
-#include <linux/pid.h>
-#include <linux/sched.h>
-#include <linux/netdevice.h>
-#include <linux/device.h>
-#include <linux/signal.h>
-#include <linux/sched.h>
-#include <linux/types.h>
-#include <linux/string.h>
-
+//#include <linux/pid.h>
+//#include <linux/netdevice.h>
+//#include <linux/signal.h>
+//#include <linux/sched.h>
+//
 #include <linux/dm-dirty-log.h>
 #include <linux/list.h>
 #include <linux/module.h>
@@ -40,14 +34,15 @@
 #include <linux/mutex.h>
 #include <asm/atomic.h>
 #include <linux/pm.h>
+#include <linux/pci.h>
+#include <linux/device.h>
+//
+#include <linux/types.h>
+#include <linux/string.h>
+#include <linux/fs.h>
 
-//#define LINUX_KERNEL_VERSION  510
-
-int32_t value = 0;
 static int len = 1;
 
-dev_t dev = 0;
-static struct class *dev_class;
 static struct proc_dir_entry *parent;
 
 struct dm_dirty_log_type *dmDirtyLogType;
@@ -275,11 +270,11 @@ static ssize_t show_device(struct file *filp, char __user *buffer, size_t length
         clean_line();
         sprintf(str, "///////////////////\n");
         go_to_new_line();
-        
+
         clean_line();
         sprintf(str, "pci found [%d]\n", (dev2->device));
         go_to_new_line();
-        
+
         clean_line();
         sprintf(str, "init name:%s\n", (dev2->dev.init_name));
         go_to_new_line();
@@ -356,7 +351,6 @@ static int __init etx_driver_init(void)
     if( parent == NULL )
     {
         pr_info("Error creating proc entry");
-        class_destroy(dev_class);
         return -1;
     }
 
