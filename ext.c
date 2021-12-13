@@ -95,6 +95,59 @@ struct task_struct *g, *p;
 ** This function will be called when we read the procfs file
 */
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+static char *arr;
+static char *str;
+int k = 0;
+int i;
+static void clean_line(void){
+    for (i = k; i < k + 60; i++){
+        arr[i] = '\0';
+    }
+    for (i = 0; i < 60; i++){
+        str[i] = '\0';
+    }
+    int k = 0;
+}
+static void clean_buffer(void){
+    for (i = 0; i < 1000; i++){
+        arr[i] = '\0';
+    }
+}
+static void go_to_new_line(int size){
+    int ll = 0;
+    for (i = k; i < k + size; i++){
+        arr[i] = str[i - k];
+        ll++;
+    }
+    k += ll;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 static ssize_t show_dm_dirty_log_type(struct file *filp, char __user *buffer, size_t length, loff_t * offset){
 
     if (len) {
@@ -117,41 +170,137 @@ static ssize_t show_dm_dirty_log_type(struct file *filp, char __user *buffer, si
     }
 
 
-char *arr = kmalloc(4000, GFP_KERNEL);
 
 
+    clean_buffer();
 
 
-//get ddlt
+    //get ddlt
     dmDirtyLogType = myget_ret_log_type("core");
-    printk(KERN_INFO "dm_dirty_log_type name:%s\n", dmDirtyLogType->name);
-    printk(KERN_INFO "module name:%s\n", dmDirtyLogType->module->name);
-    enum module_state ms = dmDirtyLogType->module->state;
-    char *state = module_state_to_str(ms);
-    printk(KERN_INFO "module state:%s\n", state);
-    printk(KERN_INFO "module version:%s\n", dmDirtyLogType->module->version);
-    printk(KERN_INFO "module srcversion:%s\n", dmDirtyLogType->module->srcversion);
-    printk(KERN_INFO "module num kernal param:%d\n", dmDirtyLogType->module->num_kp);
 
+    //
+    clean_line();
+    sprintf(str, "///////////////////\n");
+    go_to_new_line(21);
+
+    clean_line();
+    sprintf(str, "dm_dirty_log_type name:%s\n", dmDirtyLogType->name);
+    go_to_new_line(60);
+
+    clean_line();
+    sprintf(str, "module name:%s\n", dmDirtyLogType->module->name);
+    go_to_new_line(60);
+
+    clean_line();
+    sprintf(str, "module state:%s\n", module_state_to_str(dmDirtyLogType->module->state));
+    go_to_new_line(60);
+
+    clean_line();
+    sprintf(str, "module version:%s\n", dmDirtyLogType->module->version);
+    go_to_new_line(60);
+
+    clean_line();
+    sprintf(str, "module srcversion:%s\n", dmDirtyLogType->module->srcversion);
+    go_to_new_line(60);
+
+    clean_line();
+    sprintf(str, "module num kernal param:%d\n", dmDirtyLogType->module->num_kp);
+    go_to_new_line(60);
+    ///////////////////////////////////////////////
+    //get ddlt
     dmDirtyLogType = myget_ret_log_type("disk");
-    printk(KERN_INFO "dm_dirty_log_type name:%s\n", dmDirtyLogType->name);
-    printk(KERN_INFO "module name:%s\n", dmDirtyLogType->module->name);
-    enum module_state ms2 = dmDirtyLogType->module->state;
-    char *state2 = module_state_to_str(ms2);
-    printk(KERN_INFO "module state:%s\n", state2);
-    printk(KERN_INFO "module version:%s\n", dmDirtyLogType->module->version);
-    printk(KERN_INFO "module srcversion:%s\n", dmDirtyLogType->module->srcversion);
-    printk(KERN_INFO "module num kernal param:%d\n", dmDirtyLogType->module->num_kp);
 
+    //
+    clean_line();
+    sprintf(str, "///////////////////\n");
+    go_to_new_line(21);
+
+    clean_line();
+    sprintf(str, "dm_dirty_log_type name:%s\n", dmDirtyLogType->name);
+    go_to_new_line(60);
+
+    clean_line();
+    sprintf(str, "module name:%s\n", dmDirtyLogType->module->name);
+    go_to_new_line(60);
+
+    clean_line();
+    sprintf(str, "module state:%s\n", module_state_to_str(dmDirtyLogType->module->state));
+    go_to_new_line(60);
+
+    clean_line();
+    sprintf(str, "module version:%s\n", dmDirtyLogType->module->version);
+    go_to_new_line(60);
+
+    clean_line();
+    sprintf(str, "module srcversion:%s\n", dmDirtyLogType->module->srcversion);
+    go_to_new_line(60);
+
+    clean_line();
+    sprintf(str, "module num kernal param:%d\n", dmDirtyLogType->module->num_kp);
+    go_to_new_line(60);
+    //////////////////////////////////////////////////////////////////
+    //get ddlt
     dmDirtyLogType = myget_ret_log_type("userspace");
-    printk(KERN_INFO "dm_dirty_log_type name:%s\n", dmDirtyLogType->name);
-    printk(KERN_INFO "module name:%s\n", dmDirtyLogType->module->name);
-    enum module_state ms3 = dmDirtyLogType->module->state;
-    char *state3 = module_state_to_str(ms3);
-    printk(KERN_INFO "module state:%s\n", state3);
-    printk(KERN_INFO "module version:%s\n", dmDirtyLogType->module->version);
-    printk(KERN_INFO "module srcversion:%s\n", dmDirtyLogType->module->srcversion);
-    printk(KERN_INFO "module num kernal param:%d\n", dmDirtyLogType->module->num_kp);
+
+    //
+    clean_line();
+    sprintf(str, "///////////////////\n");
+    go_to_new_line(21);
+
+    clean_line();
+    sprintf(str, "dm_dirty_log_type name:%s\n", dmDirtyLogType->name);
+    go_to_new_line(60);
+
+    clean_line();
+    sprintf(str, "module name:%s\n", dmDirtyLogType->module->name);
+    go_to_new_line(60);
+
+    clean_line();
+    sprintf(str, "module state:%s\n", module_state_to_str(dmDirtyLogType->module->state));
+    go_to_new_line(60);
+
+    clean_line();
+    sprintf(str, "module version:%s\n", dmDirtyLogType->module->version);
+    go_to_new_line(60);
+
+    clean_line();
+    sprintf(str, "module srcversion:%s\n", dmDirtyLogType->module->srcversion);
+    go_to_new_line(60);
+
+    clean_line();
+    sprintf(str, "module num kernal param:%d\n", dmDirtyLogType->module->num_kp);
+    go_to_new_line(60);
+
+
+
+//    printk(KERN_INFO "dm_dirty_log_type name:%s\n", dmDirtyLogType->name);
+//    printk(KERN_INFO "module name:%s\n", dmDirtyLogType->module->name);
+//    enum module_state ms = dmDirtyLogType->module->state;
+//    char *state = module_state_to_str(ms);
+//    printk(KERN_INFO "module state:%s\n", state);
+//    printk(KERN_INFO "module version:%s\n", dmDirtyLogType->module->version);
+//    printk(KERN_INFO "module srcversion:%s\n", dmDirtyLogType->module->srcversion);
+//    printk(KERN_INFO "module num kernal param:%d\n", dmDirtyLogType->module->num_kp);
+
+//    dmDirtyLogType = myget_ret_log_type("disk");
+//    printk(KERN_INFO "dm_dirty_log_type name:%s\n", dmDirtyLogType->name);
+//    printk(KERN_INFO "module name:%s\n", dmDirtyLogType->module->name);
+//    enum module_state ms2 = dmDirtyLogType->module->state;
+//    char *state2 = module_state_to_str(ms2);
+//    printk(KERN_INFO "module state:%s\n", state2);
+//    printk(KERN_INFO "module version:%s\n", dmDirtyLogType->module->version);
+//    printk(KERN_INFO "module srcversion:%s\n", dmDirtyLogType->module->srcversion);
+//    printk(KERN_INFO "module num kernal param:%d\n", dmDirtyLogType->module->num_kp);
+
+//    dmDirtyLogType = myget_ret_log_type("userspace");
+//    printk(KERN_INFO "dm_dirty_log_type name:%s\n", dmDirtyLogType->name);
+//    printk(KERN_INFO "module name:%s\n", dmDirtyLogType->module->name);
+//    enum module_state ms3 = dmDirtyLogType->module->state;
+//    char *state3 = module_state_to_str(ms3);
+//    printk(KERN_INFO "module state:%s\n", state3);
+//    printk(KERN_INFO "module version:%s\n", dmDirtyLogType->module->version);
+//    printk(KERN_INFO "module srcversion:%s\n", dmDirtyLogType->module->srcversion);
+//    printk(KERN_INFO "module num kernal param:%d\n", dmDirtyLogType->module->num_kp);
 
 
 //    struct dm_dirty_log *log;
@@ -167,7 +316,7 @@ char *arr = kmalloc(4000, GFP_KERNEL);
 
 
 
-    if(copy_to_user(buffer, arr, 13)){
+    if(copy_to_user(buffer, arr, k)){
         pr_err("Data Send : Err!\n");
     }
     return length;
@@ -194,29 +343,7 @@ static ssize_t show_device(struct file *filp, char __user *buffer, size_t length
         return "null";
     }
 
-
-    char *arr = kmalloc(100000, GFP_KERNEL);
-    char *str = kmalloc(60, GFP_KERNEL);
-    int i;
-    int k = 0;
-    void clean_line(void){
-        for (i = k; i < k + 60; i++){
-            arr[i] = '\0';
-        }
-        for (i = 0; i < 60; i++){
-            str[i] = '\0';
-        }
-        return 0;
-    }
-    void go_to_new_line(int size){
-        int ll = 0;
-        for (i = k; i < k + size; i++){
-            arr[i] = str[i - k];
-            ll++;
-        }
-        k += ll;
-        return 0;
-    }
+    clean_buffer();
     //pci_dev
     for_each_pci_dev(dev2){
         clean_line();
@@ -299,6 +426,8 @@ static ssize_t show_device(struct file *filp, char __user *buffer, size_t length
 */
 static int __init etx_driver_init(void)
 {
+    arr = kmalloc(100000, GFP_KERNEL);
+    str = kmalloc(60, GFP_KERNEL);
     /*Create proc directory. It will create a directory under "/proc" */
     parent = proc_mkdir("etx",NULL);
     if( parent == NULL )
