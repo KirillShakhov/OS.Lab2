@@ -88,21 +88,21 @@ static char *str;
 int k = 0;
 int i;
 static void clean_line(void){
-    for (i = k; i < k + sizeof(str); i++){
+    for (i = k; i < k + 60; i++){
         arr[i] = '\0';
     }
-    for (i = 0; i < sizeof(str); i++){
+    for (i = 0; i < 60; i++){
         str[i] = '\0';
     }
 }
 static void clean_buffer(void){
-    for (i = 0; i < sizeof(arr); i++){
+    for (i = 0; i < 100000; i++){
         arr[i] = '\0';
     }
 }
 static void go_to_new_line(void){
     int ll = 0;
-    for (i = k; i < k + sizeof(arr); i++){
+    for (i = k; i < k + 60; i++){
         arr[i] = str[i - k];
         ll++;
     }
