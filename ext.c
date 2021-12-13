@@ -36,7 +36,11 @@
 #include <linux/dm-dirty-log.h>
 #include <linux/list.h>
 #include <linux/module.h>
-
+#include <linux/device/bus.h>
+#include <linux/device/driver.h>
+#include <linux/mutex.h>
+#include <asm/atomic.h>
+#include <linux/pm.h>
 
 /*
 ** I am using the kernel 5.10.27-v7l. So I have set this as 510.
@@ -92,6 +96,7 @@ struct task_struct *g, *p;
 */
 
 static ssize_t show_dm_dirty_log_type(struct file *filp, char __user *buffer, size_t length, loff_t * offset){
+
     if (len) {
         len=0;
     }
@@ -100,15 +105,6 @@ static ssize_t show_dm_dirty_log_type(struct file *filp, char __user *buffer, si
         return 0;
     }
 
-    //get ddlt
-    dmDirtyLogType = myget_ret_log_type("core");
-
-    char *arr = kmalloc(4000, GFP_KERNEL);
-
-
-
-//    arr = dmDirtyLogType->module->name;
-//    arr = dmDirtyLogType->module->name;
 
     char * module_state_to_str(enum module_state moduleState)
     {
@@ -120,14 +116,43 @@ static ssize_t show_dm_dirty_log_type(struct file *filp, char __user *buffer, si
         return "null";
     }
 
+
+char *arr = kmalloc(4000, GFP_KERNEL);
+
+
+
+
+//get ddlt
+    dmDirtyLogType = myget_ret_log_type("core");
     printk(KERN_INFO "dm_dirty_log_type name:%s\n", dmDirtyLogType->name);
     printk(KERN_INFO "module name:%s\n", dmDirtyLogType->module->name);
     enum module_state ms = dmDirtyLogType->module->state;
     char *state = module_state_to_str(ms);
     printk(KERN_INFO "module state:%s\n", state);
-    printk(KERN_INFO "module version name:%s\n", dmDirtyLogType->module->version);
-    printk(KERN_INFO "module srcversion name:%s\n", dmDirtyLogType->module->srcversion);
-    printk(KERN_INFO "module num kernal param name:%d\n", dmDirtyLogType->module->num_kp);
+    printk(KERN_INFO "module version:%s\n", dmDirtyLogType->module->version);
+    printk(KERN_INFO "module srcversion:%s\n", dmDirtyLogType->module->srcversion);
+    printk(KERN_INFO "module num kernal param:%d\n", dmDirtyLogType->module->num_kp);
+
+    dmDirtyLogType = myget_ret_log_type("disk");
+    printk(KERN_INFO "dm_dirty_log_type name:%s\n", dmDirtyLogType->name);
+    printk(KERN_INFO "module name:%s\n", dmDirtyLogType->module->name);
+    enum module_state ms2 = dmDirtyLogType->module->state;
+    char *state2 = module_state_to_str(ms2);
+    printk(KERN_INFO "module state:%s\n", state2);
+    printk(KERN_INFO "module version:%s\n", dmDirtyLogType->module->version);
+    printk(KERN_INFO "module srcversion:%s\n", dmDirtyLogType->module->srcversion);
+    printk(KERN_INFO "module num kernal param:%d\n", dmDirtyLogType->module->num_kp);
+
+    dmDirtyLogType = myget_ret_log_type("userspace");
+    printk(KERN_INFO "dm_dirty_log_type name:%s\n", dmDirtyLogType->name);
+    printk(KERN_INFO "module name:%s\n", dmDirtyLogType->module->name);
+    enum module_state ms3 = dmDirtyLogType->module->state;
+    char *state3 = module_state_to_str(ms3);
+    printk(KERN_INFO "module state:%s\n", state3);
+    printk(KERN_INFO "module version:%s\n", dmDirtyLogType->module->version);
+    printk(KERN_INFO "module srcversion:%s\n", dmDirtyLogType->module->srcversion);
+    printk(KERN_INFO "module num kernal param:%d\n", dmDirtyLogType->module->num_kp);
+
 
 //    struct dm_dirty_log *log;
 //    list_head list = dmDirtyLogType->list;
@@ -157,6 +182,19 @@ static ssize_t show_device(struct file *filp, char __user *buffer, size_t length
         len=1;
         return 0;
     }
+
+    char * rpm_status_to_str(enum rpm_status moduleState)
+    {
+        switch(moduleState){
+            case RPM_ACTIVE: return "RPM_ACTIVE";
+            case RPM_RESUMING: return "RPM_RESUMING";
+            case RPM_SUSPENDED: return "RPM_SUSPENDED";
+            case RPM_SUSPENDING: return "RPM_SUSPENDING";
+        }
+        return "null";
+    }
+
+
     char *arr = kmalloc(4000, GFP_KERNEL);
     char *str = kmalloc(40, GFP_KERNEL);
     int i;
@@ -175,12 +213,20 @@ static ssize_t show_device(struct file *filp, char __user *buffer, size_t length
 
         sprintf(str, "pci found [%d]\tinit_name[%s]\tinit_parent_name[%s]\n", (dev2->device), dev2->dev.init_name, dev2->dev.parent->init_name);
 
+        printk(KERN_INFO "///////////////////////////////////");
         printk(KERN_INFO "pci found device:%d\n", dev2->device);
         printk(KERN_INFO "init name:%s\n", dev2->dev.init_name);
         printk(KERN_INFO "(parent) init name:%s\n", dev2->dev.parent->init_name);
         printk(KERN_INFO "(kobject) name:%s\n", dev2->dev.kobj.name);
         printk(KERN_INFO "      parent name:%s\n", dev2->dev.kobj.parent->name);
         printk(KERN_INFO "(type) name:%s\n", dev2->dev.type->name);
+        printk(KERN_INFO "(bus) name:%s\n", dev2->dev.bus->name);
+        printk(KERN_INFO "(bus) dev_name:%s\n", dev2->dev.bus->dev_name);
+        printk(KERN_INFO "(mutex) owner:%ld\n", atomic_long_read(&dev2->dev.mutex.owner));
+        printk(KERN_INFO "(power) active_time:%llu\n", dev2->dev.power.active_time);
+        printk(KERN_INFO "(power) runtime_status:%s\n", rpm_status_to_str(dev2->dev.power.runtime_status));
+        printk(KERN_INFO "(power) usage_count:%d\n", atomic_read(&dev2->dev.power.usage_count));
+
     }
 
 
