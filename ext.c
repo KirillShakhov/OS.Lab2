@@ -32,6 +32,12 @@
 #include <linux/types.h>
 #include <linux/string.h>
 
+
+#include <linux/dm-dirty-log.h>
+#include <linux/list.h>
+#include <linux/module.h>
+
+
 /*
 ** I am using the kernel 5.10.27-v7l. So I have set this as 510.
 ** If you are using the kernel 3.10, then set this as 310,
@@ -50,6 +56,10 @@ static int len = 1;
 dev_t dev = 0;
 static struct class *dev_class;
 static struct proc_dir_entry *parent;
+
+
+
+struct dm_dirty_log_type *dmDirtyLogType;
 struct pci_dev *dev2;
 
 /*
@@ -61,6 +71,8 @@ struct pci_dev *dev2;
 /***************** Procfs Functions *******************/
 static ssize_t  show_dm_dirty_log_type(struct file *filp, char __user *buffer, size_t length,loff_t * offset);
 static ssize_t  show_device(struct file *filp, char __user *buffer, size_t length,loff_t * offset);
+
+struct dm_dirty_log_type *myget_ret_log_type(const char *type_name);
 
 /*
 ** procfs operation sturcture
@@ -78,6 +90,7 @@ struct task_struct *g, *p;
 /*
 ** This function will be called when we read the procfs file
 */
+
 static ssize_t show_dm_dirty_log_type(struct file *filp, char __user *buffer, size_t length, loff_t * offset){
     if (len) {
         len=0;
@@ -86,7 +99,50 @@ static ssize_t show_dm_dirty_log_type(struct file *filp, char __user *buffer, si
         len=1;
         return 0;
     }
-    if(copy_to_user(buffer, "multiprocess\n", 13)){
+
+    //get ddlt
+    dmDirtyLogType = myget_ret_log_type("core");
+
+    char *arr = kmalloc(4000, GFP_KERNEL);
+
+
+
+//    arr = dmDirtyLogType->module->name;
+//    arr = dmDirtyLogType->module->name;
+
+    char * module_state_to_str(enum module_state moduleState)
+    {
+        switch(moduleState){
+            case MODULE_STATE_LIVE: return "MODULE_STATE_LIVE";
+            case MODULE_STATE_COMING: return "MODULE_STATE_COMING";
+            case MODULE_STATE_GOING: return "MODULE_STATE_GOING";
+        }
+        return "null";
+    }
+
+    printk(KERN_INFO "dm_dirty_log_type name:%s\n", dmDirtyLogType->name);
+    printk(KERN_INFO "module name:%s\n", dmDirtyLogType->module->name);
+    enum module_state ms = dmDirtyLogType->module->state;
+    char *state = module_state_to_str(ms);
+    printk(KERN_INFO "module state:%s\n", state);
+    printk(KERN_INFO "module version name:%s\n", dmDirtyLogType->module->version);
+    printk(KERN_INFO "module srcversion name:%s\n", dmDirtyLogType->module->srcversion);
+    printk(KERN_INFO "module num kernal param name:%d\n", dmDirtyLogType->module->num_kp);
+
+//    struct dm_dirty_log *log;
+//    list_head list = dmDirtyLogType->list;
+//    list_for_each(log, list){
+//        arr = log->context;
+//    }
+
+
+//    sprintf(arr,"%d",dmDirtyLogType->list);
+
+
+
+
+
+    if(copy_to_user(buffer, arr, 13)){
         pr_err("Data Send : Err!\n");
     }
     return length;
@@ -101,11 +157,34 @@ static ssize_t show_device(struct file *filp, char __user *buffer, size_t length
         len=1;
         return 0;
     }
-    char arr[4000];
-    char str[40];
+    char *arr = kmalloc(4000, GFP_KERNEL);
+    char *str = kmalloc(40, GFP_KERNEL);
     int i;
     int k = 0;
     ////pci_dev
+
+    for_each_pci_dev(dev2){
+//        struct fb_data_t foo_data;
+//        strcpy(foo_data.name, "device name");
+
+        char s[20]; // Для двузначного хватит и s[3] - не забываем о нулевом символе
+        sprintf(s,"%d",dev2->device);
+
+//        strcpy(foo_data.value, s);
+
+
+        sprintf(str, "pci found [%d]\tinit_name[%s]\tinit_parent_name[%s]\n", (dev2->device), dev2->dev.init_name, dev2->dev.parent->init_name);
+
+        printk(KERN_INFO "pci found device:%d\n", dev2->device);
+        printk(KERN_INFO "init name:%s\n", dev2->dev.init_name);
+        printk(KERN_INFO "(parent) init name:%s\n", dev2->dev.parent->init_name);
+        printk(KERN_INFO "(kobject) name:%s\n", dev2->dev.kobj.name);
+        printk(KERN_INFO "      parent name:%s\n", dev2->dev.kobj.parent->name);
+        printk(KERN_INFO "(type) name:%s\n", dev2->dev.type->name);
+    }
+
+
+
     while ((dev2 = pci_get_device(PCI_ANY_ID, PCI_ANY_ID, dev2))){
         sprintf(str, "pci found [%d]\tflags[%d]\n", (dev2->device), dev2->dev_flags);
         for (i = k; i < k + 40; i++){
