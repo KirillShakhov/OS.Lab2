@@ -1,4 +1,4 @@
-obj-m += ext.o
+obj-m += lab.o
 
 EXTRA_CFLAGS += -I${PWD}/include
 
@@ -8,7 +8,7 @@ all:
 clean:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
 test:
-	sudo rmmod ext.ko
-	sudo insmod ext.ko
+	sudo rmmod lab.ko
+	sudo insmod lab.ko
 ins:
-	sudo insmod ext.ko
+	sudo insmod lab.ko
