@@ -195,49 +195,96 @@ static ssize_t show_device(struct file *filp, char __user *buffer, size_t length
     }
 
 
-    char *arr = kmalloc(4000, GFP_KERNEL);
-    char *str = kmalloc(40, GFP_KERNEL);
+    char *arr = kmalloc(100000, GFP_KERNEL);
+    char *str = kmalloc(60, GFP_KERNEL);
     int i;
     int k = 0;
-    ////pci_dev
-
-    for_each_pci_dev(dev2){
-//        struct fb_data_t foo_data;
-//        strcpy(foo_data.name, "device name");
-
-        char s[20]; // Для двузначного хватит и s[3] - не забываем о нулевом символе
-        sprintf(s,"%d",dev2->device);
-
-//        strcpy(foo_data.value, s);
-
-
-        sprintf(str, "pci found [%d]\tinit_name[%s]\tinit_parent_name[%s]\n", (dev2->device), dev2->dev.init_name, dev2->dev.parent->init_name);
-
-        printk(KERN_INFO "///////////////////////////////////");
-        printk(KERN_INFO "pci found device:%d\n", dev2->device);
-        printk(KERN_INFO "init name:%s\n", dev2->dev.init_name);
-        printk(KERN_INFO "(parent) init name:%s\n", dev2->dev.parent->init_name);
-        printk(KERN_INFO "(kobject) name:%s\n", dev2->dev.kobj.name);
-        printk(KERN_INFO "      parent name:%s\n", dev2->dev.kobj.parent->name);
-        printk(KERN_INFO "(type) name:%s\n", dev2->dev.type->name);
-        printk(KERN_INFO "(bus) name:%s\n", dev2->dev.bus->name);
-        printk(KERN_INFO "(bus) dev_name:%s\n", dev2->dev.bus->dev_name);
-        printk(KERN_INFO "(mutex) owner:%ld\n", atomic_long_read(&dev2->dev.mutex.owner));
-        printk(KERN_INFO "(power) active_time:%llu\n", dev2->dev.power.active_time);
-        printk(KERN_INFO "(power) runtime_status:%s\n", rpm_status_to_str(dev2->dev.power.runtime_status));
-        printk(KERN_INFO "(power) usage_count:%d\n", atomic_read(&dev2->dev.power.usage_count));
-
-    }
-
-
-
-    while ((dev2 = pci_get_device(PCI_ANY_ID, PCI_ANY_ID, dev2))){
-        sprintf(str, "pci found [%d]\tflags[%d]\n", (dev2->device), dev2->dev_flags);
-        for (i = k; i < k + 40; i++){
-            arr[i] = str[i - k];
+    void clean_line(void){
+        for (i = k; i < k + 60; i++){
+            arr[i] = '\0';
         }
-        k += 40;
-        if (k >= 4000) break;
+        for (i = 0; i < 60; i++){
+            str[i] = '\0';
+        }
+        return 0;
+    }
+    void go_to_new_line(int size){
+        int ll = 0;
+        for (i = k; i < k + size; i++){
+            arr[i] = str[i - k];
+            ll++;
+        }
+        k += ll;
+        return 0;
+    }
+    //pci_dev
+    for_each_pci_dev(dev2){
+        clean_line();
+        sprintf(str, "///////////////////\n");
+        go_to_new_line(21);
+        
+        clean_line();
+        sprintf(str, "pci found [%d]\n", (dev2->device));
+        go_to_new_line(16+sizeof(dev2->device));
+        
+        clean_line();
+        sprintf(str, "init name:%s\n", (dev2->dev.init_name));
+        go_to_new_line(10+sizeof(dev2->dev.init_name));
+
+        clean_line();
+        sprintf(str, "(parent) init name:%s\n", (dev2->dev.parent->init_name));
+        go_to_new_line(19+sizeof(dev2->dev.parent->init_name));
+
+        clean_line();
+        sprintf(str, "(kobject) name:%s\n", (dev2->dev.kobj.name));
+        go_to_new_line(26+sizeof(dev2->dev.kobj.name));
+
+        clean_line();
+        sprintf(str, "    parent name:%s\n", (dev2->dev.kobj.parent->name));
+        go_to_new_line(26+sizeof(dev2->dev.kobj.parent->name));
+
+        clean_line();
+        sprintf(str, "(type) name:%s\n", (dev2->dev.type->name));
+        go_to_new_line(60);
+
+        clean_line();
+        sprintf(str, "(bus) name:%s\n", (dev2->dev.bus->name));
+        go_to_new_line(60);
+
+        clean_line();
+        sprintf(str, "(bus) dev_name:%s\n", (dev2->dev.bus->dev_name));
+        go_to_new_line(60);
+
+        clean_line();
+        sprintf(str, "(mutex) owner:%ld\n", atomic_long_read(&dev2->dev.mutex.owner));
+        go_to_new_line(60);
+
+        clean_line();
+        sprintf(str, "(power) active_time:%llu\n", dev2->dev.power.active_time);
+        go_to_new_line(60);
+
+        clean_line();
+        sprintf(str, "(power) runtime_status:%s\n", rpm_status_to_str(dev2->dev.power.runtime_status));
+        go_to_new_line(60);
+
+        clean_line();
+        sprintf(str, "(power) usage_count:%d\n", atomic_read(&dev2->dev.power.usage_count));
+        go_to_new_line(60);
+
+
+//        printk(KERN_INFO "pci found device:%d\n", dev2->device);
+//        printk(KERN_INFO "init name:%s\n", dev2->dev.init_name);
+//        printk(KERN_INFO "(parent) init name:%s\n", dev2->dev.parent->init_name);
+//        printk(KERN_INFO "(kobject) name:%s\n", dev2->dev.kobj.name);
+//        printk(KERN_INFO "      parent name:%s\n", dev2->dev.kobj.parent->name);
+//        printk(KERN_INFO "(type) name:%s\n", dev2->dev.type->name);
+//        printk(KERN_INFO "(bus) name:%s\n", dev2->dev.bus->name);
+//        printk(KERN_INFO "(bus) dev_name:%s\n", dev2->dev.bus->dev_name);
+//        printk(KERN_INFO "(mutex) owner:%ld\n", atomic_long_read(&dev2->dev.mutex.owner));
+//        printk(KERN_INFO "(power) active_time:%llu\n", dev2->dev.power.active_time);
+//        printk(KERN_INFO "(power) runtime_status:%s\n", rpm_status_to_str(dev2->dev.power.runtime_status));
+//        printk(KERN_INFO "(power) usage_count:%d\n", atomic_read(&dev2->dev.power.usage_count));
+        if (k >= 90000) break;
     }
     ////multiprocess
     //print
